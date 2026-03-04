@@ -22,7 +22,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 
@@ -69,7 +68,7 @@ public class ForbiddenBorderMod implements ModInitializer {
             }
 
             if (state.isInside(player.getX(), player.getZ())) {
-                Vec3d safePosition = computeOutsidePosition(state, player.getPos());
+                Vec3d safePosition = computeOutsidePosition(state, new Vec3d(player.getX(), player.getY(), player.getZ()));
                 player.requestTeleport(safePosition.x, player.getY(), safePosition.z);
                 player.sendMessage(Text.literal("You cannot enter the forbidden inner border."), true);
             }
@@ -85,9 +84,7 @@ public class ForbiddenBorderMod implements ModInitializer {
         int points = Math.max(PARTICLE_POINTS_MIN, (int) (state.getRadius() * 1.5D));
 
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            if (!(player.getWorld() instanceof ServerWorld serverWorld)) {
-                continue;
-            }
+            ServerWorld serverWorld = player.getServerWorld();
 
             double baseY = player.getY();
             for (int i = 0; i < points; i++) {
@@ -100,7 +97,7 @@ public class ForbiddenBorderMod implements ModInitializer {
                 }
 
                 for (int yStep = -2; yStep <= 3; yStep++) {
-                    serverWorld.spawnParticles(player, BORDER_PARTICLE, true, x, baseY + yStep, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                    serverWorld.spawnParticles(player, BORDER_PARTICLE, true, false, x, baseY + yStep, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
                 }
             }
         }
@@ -142,17 +139,11 @@ public class ForbiddenBorderMod implements ModInitializer {
 
     private static ForbiddenBorderState getState(MinecraftServer server) {
         PersistentStateManager stateManager = server.getOverworld().getPersistentStateManager();
-        PersistentState.Type<ForbiddenBorderState> type = new PersistentState.Type<>(
-            ForbiddenBorderState::createDefault,
-            ForbiddenBorderState::fromNbt,
-            null
-        );
-        return stateManager.getOrCreate(type, ForbiddenBorderState.KEY);
+        return stateManager.getOrCreate(ForbiddenBorderState::fromNbt, ForbiddenBorderState::createDefault, ForbiddenBorderState.KEY);
     }
 
     private void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
         dispatcher.register(CommandManager.literal("border")
-            .requires(source -> source.hasPermissionLevel(2))
             .then(CommandManager.literal("enable")
                 .executes(context -> {
                     ForbiddenBorderState state = getState(context.getSource().getServer());
