@@ -143,7 +143,7 @@ public class ForbiddenBorderMod implements ModInitializer {
         PersistentStateType<ForbiddenBorderState> stateType = new PersistentStateType<>(
             ForbiddenBorderState.KEY,
             ForbiddenBorderState::createDefault,
-            ForbiddenBorderState::fromNbt,
+            ForbiddenBorderState.CODEC,
             null
         );
         return stateManager.getOrCreate(stateType);

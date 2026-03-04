@@ -1,37 +1,37 @@
 package com.example.forbiddenborder;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.PersistentState;
 
 public class ForbiddenBorderState extends PersistentState {
     public static final String KEY = "forbidden_border";
 
-    private boolean enabled = false;
-    private double centerX = 0.0D;
-    private double centerZ = 0.0D;
-    private double radius = 64.0D;
+    public static final Codec<ForbiddenBorderState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+        Codec.BOOL.optionalFieldOf("enabled", false).forGetter(ForbiddenBorderState::isEnabled),
+        Codec.DOUBLE.optionalFieldOf("center_x", 0.0D).forGetter(ForbiddenBorderState::getCenterX),
+        Codec.DOUBLE.optionalFieldOf("center_z", 0.0D).forGetter(ForbiddenBorderState::getCenterZ),
+        Codec.DOUBLE.optionalFieldOf("radius", 64.0D).forGetter(ForbiddenBorderState::getRadius)
+    ).apply(instance, ForbiddenBorderState::new));
+
+    private boolean enabled;
+    private double centerX;
+    private double centerZ;
+    private double radius;
+
+    public ForbiddenBorderState() {
+        this(false, 0.0D, 0.0D, 64.0D);
+    }
+
+    private ForbiddenBorderState(boolean enabled, double centerX, double centerZ, double radius) {
+        this.enabled = enabled;
+        this.centerX = centerX;
+        this.centerZ = centerZ;
+        this.radius = Math.max(1.0D, radius);
+    }
 
     public static ForbiddenBorderState createDefault() {
         return new ForbiddenBorderState();
-    }
-
-    public static ForbiddenBorderState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        ForbiddenBorderState state = new ForbiddenBorderState();
-        state.enabled = nbt.getBoolean("enabled", false);
-        state.centerX = nbt.getDouble("center_x", 0.0D);
-        state.centerZ = nbt.getDouble("center_z", 0.0D);
-        state.radius = Math.max(1.0D, nbt.getDouble("radius", 64.0D));
-        return state;
-    }
-
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        nbt.putBoolean("enabled", this.enabled);
-        nbt.putDouble("center_x", this.centerX);
-        nbt.putDouble("center_z", this.centerZ);
-        nbt.putDouble("radius", this.radius);
-        return nbt;
     }
 
     public boolean isEnabled() {
