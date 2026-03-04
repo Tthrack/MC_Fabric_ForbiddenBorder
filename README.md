@@ -30,7 +30,7 @@ Jars are written to `build/libs`.
 
 > If you prefer using `./gradlew`, regenerate the Gradle wrapper jar locally with:
 >
-> `gradle wrapper --gradle-version 8.11.1 --no-validate-url`
+> `gradle wrapper --gradle-version 8.8 --no-validate-url`
 
 
-GitHub Actions builds with a pinned Gradle 8.11.1 distribution.
+GitHub Actions builds with a pinned Gradle 8.8 distribution.
