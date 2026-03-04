@@ -1,6 +1,6 @@
 # Forbidden Border (Fabric, server-side)
 
-Minecraft 1.21.11 Fabric server-side mod (Java 21) that provides an **inverted cylindrical border**:
+Minecraft 1.21.1 Fabric server-side mod (Java 21) that provides an **inverted cylindrical border**:
 
 - `/border enable|disable|center|radius|status`
 - Survival/Adventure players cannot enter/build inside the cylinder
