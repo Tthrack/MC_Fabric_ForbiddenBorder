@@ -22,9 +22,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ForbiddenBorderMod implements ModInitializer {
     private static final double PUSHBACK_DISTANCE = 0.8D;
@@ -140,14 +144,36 @@ public class ForbiddenBorderMod implements ModInitializer {
         return allowed;
     }
 
+    @SuppressWarnings("unchecked")
     private static ForbiddenBorderState getState(MinecraftServer server) {
         PersistentStateManager stateManager = server.getOverworld().getPersistentStateManager();
-        PersistentState.Type<ForbiddenBorderState> type = new PersistentState.Type<>(
-            ForbiddenBorderState::createDefault,
-            ForbiddenBorderState::fromNbt,
-            null
-        );
-        return stateManager.getOrCreate(type, ForbiddenBorderState.KEY);
+
+        try {
+            Method legacyGetOrCreate = PersistentStateManager.class.getMethod("getOrCreate", Function.class, Supplier.class, String.class);
+            return (ForbiddenBorderState) legacyGetOrCreate.invoke(
+                stateManager,
+                (Function<?, ?>) (nbt -> ForbiddenBorderState.fromNbt((net.minecraft.nbt.NbtCompound) nbt)),
+                (Supplier<?>) ForbiddenBorderState::createDefault,
+                ForbiddenBorderState.KEY
+            );
+        } catch (ReflectiveOperationException ignored) {
+            // Fall through to newer API variant below.
+        }
+
+        try {
+            Class<?> typeClass = Class.forName("net.minecraft.world.PersistentState$Type");
+            Constructor<?> typeConstructor = typeClass.getConstructor(Supplier.class, Class.forName("net.minecraft.world.PersistentState$Reader"), Class.forName("net.minecraft.datafixer.DataFixTypes"));
+            Object reader = java.lang.reflect.Proxy.newProxyInstance(
+                typeClass.getClassLoader(),
+                new Class<?>[]{Class.forName("net.minecraft.world.PersistentState$Reader")},
+                (proxy, method, args) -> ForbiddenBorderState.fromNbt((net.minecraft.nbt.NbtCompound) args[0])
+            );
+            Object type = typeConstructor.newInstance((Supplier<?>) ForbiddenBorderState::createDefault, reader, null);
+            Method getOrCreate = PersistentStateManager.class.getMethod("getOrCreate", typeClass, String.class);
+            return (ForbiddenBorderState) getOrCreate.invoke(stateManager, type, ForbiddenBorderState.KEY);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Unable to access PersistentStateManager#getOrCreate for this Minecraft runtime", e);
+        }
     }
 
     private void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {

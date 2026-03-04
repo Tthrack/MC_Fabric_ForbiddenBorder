@@ -25,6 +25,15 @@ public class ForbiddenBorderState extends PersistentState {
         return state;
     }
 
+    public static ForbiddenBorderState fromNbt(NbtCompound nbt) {
+        ForbiddenBorderState state = new ForbiddenBorderState();
+        state.enabled = nbt.getBoolean("enabled");
+        state.centerX = nbt.getDouble("center_x");
+        state.centerZ = nbt.getDouble("center_z");
+        state.radius = Math.max(1.0D, nbt.getDouble("radius"));
+        return state;
+    }
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         nbt.putBoolean("enabled", this.enabled);
