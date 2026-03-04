@@ -19,7 +19,9 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-command-api-v2:2.4.7+6b42a6003e"
+    modImplementation "net.fabricmc.fabric-api:fabric-lifecycle-events-v1:2.6.15+4ebb5c0853"
+    modImplementation "net.fabricmc.fabric-api:fabric-events-interaction-v0:4.1.0+3b89ecf63e"
 }
 
 loom {
