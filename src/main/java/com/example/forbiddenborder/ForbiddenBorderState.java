@@ -1,6 +1,7 @@
 package com.example.forbiddenborder;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.PersistentState;
 
 public class ForbiddenBorderState extends PersistentState {
@@ -15,7 +16,7 @@ public class ForbiddenBorderState extends PersistentState {
         return new ForbiddenBorderState();
     }
 
-    public static ForbiddenBorderState fromNbt(NbtCompound nbt) {
+    public static ForbiddenBorderState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         ForbiddenBorderState state = new ForbiddenBorderState();
         state.enabled = nbt.getBoolean("enabled", false);
         state.centerX = nbt.getDouble("center_x", 0.0D);
@@ -25,7 +26,7 @@ public class ForbiddenBorderState extends PersistentState {
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         nbt.putBoolean("enabled", this.enabled);
         nbt.putDouble("center_x", this.centerX);
         nbt.putDouble("center_z", this.centerZ);

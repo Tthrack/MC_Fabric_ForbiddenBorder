@@ -23,6 +23,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.PersistentStateManager;
+import net.minecraft.world.PersistentStateType;
 import net.minecraft.world.World;
 
 public class ForbiddenBorderMod implements ModInitializer {
@@ -84,7 +85,7 @@ public class ForbiddenBorderMod implements ModInitializer {
         int points = Math.max(PARTICLE_POINTS_MIN, (int) (state.getRadius() * 1.5D));
 
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            ServerWorld serverWorld = player.getServerWorld();
+            ServerWorld serverWorld = server.getOverworld();
 
             double baseY = player.getY();
             for (int i = 0; i < points; i++) {
@@ -139,7 +140,13 @@ public class ForbiddenBorderMod implements ModInitializer {
 
     private static ForbiddenBorderState getState(MinecraftServer server) {
         PersistentStateManager stateManager = server.getOverworld().getPersistentStateManager();
-        return stateManager.getOrCreate(ForbiddenBorderState::fromNbt, ForbiddenBorderState::createDefault, ForbiddenBorderState.KEY);
+        PersistentStateType<ForbiddenBorderState> stateType = new PersistentStateType<>(
+            ForbiddenBorderState.KEY,
+            ForbiddenBorderState::createDefault,
+            ForbiddenBorderState::fromNbt,
+            null
+        );
+        return stateManager.getOrCreate(stateType);
     }
 
     private void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
