@@ -7,12 +7,9 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.BlockItem;
-import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -25,14 +22,16 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.PersistentStateType;
 import net.minecraft.world.World;
+import org.joml.Vector3f;
 
 public class ForbiddenBorderMod implements ModInitializer {
     private static final double PUSHBACK_DISTANCE = 0.8D;
     private static final int PARTICLE_VIEW_DISTANCE = 128;
     private static final int PARTICLE_POINTS_MIN = 60;
 
-    private static final ParticleEffect BORDER_PARTICLE =
-        new BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, Blocks.BARRIER.getDefaultState());
+    // Cyan-blue shimmer to visually match vanilla world-border styling.
+    private static final DustParticleEffect BORDER_PARTICLE =
+        new DustParticleEffect(new Vector3f(0.20F, 0.65F, 1.00F), 1.15F);
 
     private static long tickCounter = 0L;
 
