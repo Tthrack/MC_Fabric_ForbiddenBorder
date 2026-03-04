@@ -22,7 +22,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.PersistentStateType;
 import net.minecraft.world.World;
-import org.joml.Vector3f;
 
 public class ForbiddenBorderMod implements ModInitializer {
     private static final double PUSHBACK_DISTANCE = 0.8D;
@@ -31,7 +30,7 @@ public class ForbiddenBorderMod implements ModInitializer {
 
     // Cyan-blue shimmer to visually match vanilla world-border styling.
     private static final DustParticleEffect BORDER_PARTICLE =
-        new DustParticleEffect(new Vector3f(0.20F, 0.65F, 1.00F), 1.15F);
+        new DustParticleEffect(0x33A6FF, 1.15F);
 
     private static long tickCounter = 0L;
 
