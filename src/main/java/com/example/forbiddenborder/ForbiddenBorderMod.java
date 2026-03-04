@@ -9,6 +9,9 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.BlockItem;
+import net.minecraft.block.Blocks;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
@@ -27,6 +30,9 @@ public class ForbiddenBorderMod implements ModInitializer {
     private static final double PUSHBACK_DISTANCE = 0.8D;
     private static final int PARTICLE_VIEW_DISTANCE = 128;
     private static final int PARTICLE_POINTS_MIN = 60;
+
+    private static final ParticleEffect BORDER_PARTICLE =
+        new BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, Blocks.BARRIER.getDefaultState());
 
     private static long tickCounter = 0L;
 
@@ -94,7 +100,7 @@ public class ForbiddenBorderMod implements ModInitializer {
                 }
 
                 for (int yStep = -2; yStep <= 3; yStep++) {
-                    serverWorld.spawnParticles(player, ParticleTypes.BARRIER, true, x, baseY + yStep, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                    serverWorld.spawnParticles(player, BORDER_PARTICLE, true, x, baseY + yStep, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
                 }
             }
         }
