@@ -1,6 +1,6 @@
 # Forbidden Border (Fabric, server-side)
 
-Minecraft 1.21.1 Fabric server-side mod (Java 21) that provides an **inverted cylindrical border**:
+Minecraft 1.21.11 Fabric server-side mod (Java 21) that provides an **inverted cylindrical border**:
 
 - `/border enable|disable|center|radius|status`
 - Survival/Adventure players cannot enter/build inside the cylinder
@@ -30,7 +30,7 @@ Jars are written to `build/libs`.
 
 > If you prefer using `./gradlew`, regenerate the Gradle wrapper jar locally with:
 >
-> `gradle wrapper --gradle-version 8.8 --no-validate-url`
+> `gradle wrapper --gradle-version 8.14.3 --no-validate-url`
 
 
-GitHub Actions builds with a pinned Gradle 8.8 distribution.
+GitHub Actions builds with a pinned Gradle 8.14.3 distribution.

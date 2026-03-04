@@ -7,9 +7,9 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.BlockItem;
-import net.minecraft.block.Blocks;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -22,15 +22,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
-
-import java.lang.reflect.Method;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ForbiddenBorderMod implements ModInitializer {
     private static final double PUSHBACK_DISTANCE = 0.8D;
@@ -39,11 +33,8 @@ public class ForbiddenBorderMod implements ModInitializer {
 
     private static final ParticleEffect BORDER_PARTICLE =
         new BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, Blocks.BARRIER.getDefaultState());
-    private static final Logger LOGGER = LoggerFactory.getLogger(ForbiddenBorderMod.class);
 
     private static long tickCounter = 0L;
-    private static ForbiddenBorderState fallbackState = ForbiddenBorderState.createDefault();
-    private static boolean warnedFallbackPersistence = false;
 
     @Override
     public void onInitialize() {
@@ -149,25 +140,14 @@ public class ForbiddenBorderMod implements ModInitializer {
         return allowed;
     }
 
-    @SuppressWarnings("unchecked")
     private static ForbiddenBorderState getState(MinecraftServer server) {
         PersistentStateManager stateManager = server.getOverworld().getPersistentStateManager();
-
-        try {
-            Method legacyGetOrCreate = PersistentStateManager.class.getMethod("getOrCreate", Function.class, Supplier.class, String.class);
-            return (ForbiddenBorderState) legacyGetOrCreate.invoke(
-                stateManager,
-                (Function<?, ?>) (nbt -> ForbiddenBorderState.fromNbt((net.minecraft.nbt.NbtCompound) nbt)),
-                (Supplier<?>) ForbiddenBorderState::createDefault,
-                ForbiddenBorderState.KEY
-            );
-        } catch (ReflectiveOperationException e) {
-            if (!warnedFallbackPersistence) {
-                warnedFallbackPersistence = true;
-                LOGGER.warn("ForbiddenBorder could not access PersistentStateManager#getOrCreate on this runtime. Using non-persistent fallback state for this server session.", e);
-            }
-            return fallbackState;
-        }
+        PersistentState.Type<ForbiddenBorderState> type = new PersistentState.Type<>(
+            ForbiddenBorderState::createDefault,
+            ForbiddenBorderState::fromNbt,
+            null
+        );
+        return stateManager.getOrCreate(type, ForbiddenBorderState.KEY);
     }
 
     private void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
