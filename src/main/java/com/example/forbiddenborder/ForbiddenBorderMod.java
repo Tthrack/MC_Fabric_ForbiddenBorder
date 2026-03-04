@@ -25,10 +25,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ForbiddenBorderMod implements ModInitializer {
     private static final double PUSHBACK_DISTANCE = 0.8D;
@@ -37,8 +39,11 @@ public class ForbiddenBorderMod implements ModInitializer {
 
     private static final ParticleEffect BORDER_PARTICLE =
         new BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, Blocks.BARRIER.getDefaultState());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForbiddenBorderMod.class);
 
     private static long tickCounter = 0L;
+    private static ForbiddenBorderState fallbackState = ForbiddenBorderState.createDefault();
+    private static boolean warnedFallbackPersistence = false;
 
     @Override
     public void onInitialize() {
@@ -156,23 +161,12 @@ public class ForbiddenBorderMod implements ModInitializer {
                 (Supplier<?>) ForbiddenBorderState::createDefault,
                 ForbiddenBorderState.KEY
             );
-        } catch (ReflectiveOperationException ignored) {
-            // Fall through to newer API variant below.
-        }
-
-        try {
-            Class<?> typeClass = Class.forName("net.minecraft.world.PersistentState$Type");
-            Constructor<?> typeConstructor = typeClass.getConstructor(Supplier.class, Class.forName("net.minecraft.world.PersistentState$Reader"), Class.forName("net.minecraft.datafixer.DataFixTypes"));
-            Object reader = java.lang.reflect.Proxy.newProxyInstance(
-                typeClass.getClassLoader(),
-                new Class<?>[]{Class.forName("net.minecraft.world.PersistentState$Reader")},
-                (proxy, method, args) -> ForbiddenBorderState.fromNbt((net.minecraft.nbt.NbtCompound) args[0])
-            );
-            Object type = typeConstructor.newInstance((Supplier<?>) ForbiddenBorderState::createDefault, reader, null);
-            Method getOrCreate = PersistentStateManager.class.getMethod("getOrCreate", typeClass, String.class);
-            return (ForbiddenBorderState) getOrCreate.invoke(stateManager, type, ForbiddenBorderState.KEY);
         } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Unable to access PersistentStateManager#getOrCreate for this Minecraft runtime", e);
+            if (!warnedFallbackPersistence) {
+                warnedFallbackPersistence = true;
+                LOGGER.warn("ForbiddenBorder could not access PersistentStateManager#getOrCreate on this runtime. Using non-persistent fallback state for this server session.", e);
+            }
+            return fallbackState;
         }
     }
 
