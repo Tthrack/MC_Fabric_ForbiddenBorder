@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "forbidden-border",
+  "version": "${version}",
+  "name": "Forbidden Border",
+  "description": "Server-side inverted cylindrical border for survival/adventure restrictions.",
+  "authors": [
+    "Codex"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.example.forbiddenborder.ForbiddenBorderMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
